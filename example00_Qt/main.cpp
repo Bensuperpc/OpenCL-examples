@@ -1,10 +1,12 @@
 #include <iostream>
 #ifdef __APPLE__
-    #include <OpenCL/cl.hpp>
+#include <OpenCL/cl.hpp>
 #else
-    #include <CL/cl.hpp>
+#include <CL/cl.hpp>
 #endif
 
+//https://github.com/Dakkers/OpenCL-examples
+//https://stackoverflow.com/questions/23992369/what-should-i-use-instead-of-clkernelfunctor
 int main() {
     // get all platforms (drivers), e.g. NVIDIA
     std::vector<cl::Platform> all_platforms;
@@ -20,14 +22,17 @@ int main() {
     // get default device (CPUs, GPUs) of the default platform
     std::vector<cl::Device> all_devices;
     default_platform.getDevices(CL_DEVICE_TYPE_ALL, &all_devices);
+
     if(all_devices.size()==0){
         std::cout<<" No devices found. Check OpenCL installation!\n";
         exit(1);
     }
 
+
     // use device[0] on Nvidia and use device[1] on AMD
     cl::Device default_device=all_devices[0];
     std::cout<< "Using device: "<<default_device.getInfo<CL_DEVICE_NAME>()<<"\n";
+
 
     // a context is like a "runtime link" to the device and platform;
     // i.e. communication is possible
@@ -60,7 +65,7 @@ int main() {
         std::cout << "Error building: " << program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(default_device) << std::endl;
         exit(1);
     }
-    
+
     // apparently OpenCL only likes arrays ...
     // N holds the number of elements in the vectors we want to add
     int N[1] = {100};
@@ -93,6 +98,7 @@ int main() {
     simple_add.setArg(1, buffer_B);
     simple_add.setArg(2, buffer_C);
 
+    queue.enqueueNDRangeKernel(simple_add,cl::NullRange,cl::NDRange(10),cl::NullRange);
     int C[n];
     // read result from GPU to here
     queue.enqueueReadBuffer(buffer_C, CL_TRUE, 0, sizeof(int)*n, C);
@@ -105,4 +111,3 @@ int main() {
 
     return 0;
 }
-
