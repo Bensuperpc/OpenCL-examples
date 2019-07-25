@@ -1,9 +1,9 @@
 #include <iostream>
 #include <ctime>
 #ifdef __APPLE__
-    #include <OpenCL/cl.hpp>
+#include <OpenCL/cl.hpp>
 #else
-    #include <CL/cl.hpp>
+#include <CL/cl.hpp>
 #endif
 
 #define NUM_GLOBAL_WITEMS 1024
@@ -44,7 +44,7 @@ double timeAddVectorsCPU(int n, int k) {
 }
 
 
-void warmup(cl::Context &context, cl::CommandQueue &queue, 
+void warmup(cl::Context &context, cl::CommandQueue &queue,
             cl::Kernel &add, int A[], int B[], int n) {
     int C[n];
     // allocate space
@@ -61,10 +61,10 @@ void warmup(cl::Context &context, cl::CommandQueue &queue,
     add.setArg(0, buffer_A);
     add.setArg(2, buffer_C);
     for (int i=0; i<5; i++)
-        queue.enqueueNDRangeKernel(add, cl::NullRange, cl::NDRange(NUM_GLOBAL_WITEMS), cl::NDRange(32));              
-   
-    queue.enqueueReadBuffer(buffer_C, CL_TRUE, 0, sizeof(int)*n, C); 
-    queue.finish(); 
+        queue.enqueueNDRangeKernel(add, cl::NullRange, cl::NDRange(NUM_GLOBAL_WITEMS), cl::NDRange(32));
+
+    queue.enqueueReadBuffer(buffer_C, CL_TRUE, 0, sizeof(int)*n, C);
+    queue.finish();
 }
 
 
@@ -75,7 +75,7 @@ int main(int argc, char* argv[]) {
         verbose = true;
     else
         verbose = false;
-    
+
     const int n = 8*32*512;             // size of vectors
     const int k = 10000;                // number of loop iterations
     // const int NUM_GLOBAL_WITEMS = 1024; // number of threads
@@ -144,7 +144,7 @@ int main(int argc, char* argv[]) {
         "               v3[j] = v1[j] + v2[j];"
         "       }"
         "   }"
-        ""    
+        ""
         "   void kernel add_single(global const int* v1, global const int* v2, global int* v3, "
         "                          const int k) { "
         "       int ID = get_global_id(0);"
@@ -203,8 +203,8 @@ int main(int argc, char* argv[]) {
     add_looped_1.setArg(3, n);
     add_looped_1.setArg(4, k);
     queue.enqueueNDRangeKernel(add_looped_1, cl::NullRange,  // kernel, offset
-            cl::NDRange(NUM_GLOBAL_WITEMS), // global number of work items
-            cl::NDRange(32));               // local number (per group)
+                               cl::NDRange(NUM_GLOBAL_WITEMS), // global number of work items
+                               cl::NDRange(32));               // local number (per group)
 
     // read result from GPU to here; including for the sake of timing
     queue.enqueueReadBuffer(buffer_C, CL_TRUE, 0, sizeof(int)*n, C);
@@ -227,7 +227,7 @@ int main(int argc, char* argv[]) {
     add_looped_2.setArg(2, buffer_C2);
     add_looped_2.setArg(3, n);
     add_looped_2.setArg(4, k);
-    
+
     queue.enqueueNDRangeKernel(add_looped_2, cl::NullRange, cl::NDRange(NUM_GLOBAL_WITEMS), cl::NDRange(32));
     queue.enqueueReadBuffer(buffer_C2, CL_TRUE, 0, sizeof(int)*n, C);
     queue.finish();
